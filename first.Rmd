@@ -1,0 +1,45 @@
+---
+title: "first_markdown"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+library(readr)
+```
+
+##Reading the Data
+
+The data shows the favorite restaurants of the class. In addition to the name of each restaurant, it shows the most recent visit, the type of food, and location, among other things.
+
+```{r}
+class <- read_csv("C:\\users\\sz7nv\\desktop\\fav_restaurants.csv")
+```
+
+
+##Plotting the Data
+
+This data shows the locations of our classes favorite restaurants.
+```{r}
+ggplot(class, aes(location)) +
+  geom_bar()
+```
+
+This data shows us how expensie the restaurants are, in realtion to how much they are visited.
+```{r}
+ggplot(class, aes(cost_per_person, yearly_visits)) +
+  geom_point()
+```
+
+This data show what types of food are served at each retsaurant.
+```{r}
+ggplot(class, aes(cuisine)) +
+  geom_bar()
+```
+
+
+
+
+
