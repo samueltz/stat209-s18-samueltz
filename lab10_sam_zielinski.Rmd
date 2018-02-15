@@ -1,0 +1,100 @@
+---
+title: "Lab 10: Filtering Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(fig.height = 5)
+knitr::opts_chunk$set(fig.width = 8.5)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(viridis)
+theme_set(theme_minimal())
+```
+
+## Pick a dataset
+
+Today you will again have a choice of three datasets to work with. You can
+choose either to investigate the daily team ELO ratings in the NBA:
+
+```{r}
+nba <- read_csv("https://statsmaths.github.io/stat_data/nba_elo_daily.csv")
+```
+
+Metadata from US senator's tweets:
+
+```{r}
+tweets <- read_csv("https://statsmaths.github.io/stat_data/senator_tweets_meta.csv")
+```
+
+Or swear words given in the movies of Quentin Tarantino:
+
+```{r}
+tarantino <- read_csv("https://statsmaths.github.io/stat_data/tarantino.csv")
+```
+
+Pick a dataset (feel free to delete the others from the Rmd file if you would
+like), and work on the instructions in the next section.
+
+## Instructions
+
+This lab is similar to the last. You'll pick a dataset and then generate an
+analysis of that data using data visualizations. The difference here is that
+instead of a single plot, I would like you to construct 3-4 plots that
+together tell a linear story. Each plot should be separated by a sentence or
+two describing what the viewer should take away from the plot. Try to keep the
+plots similar in some way; perhaps each simply highlights a different subset
+of the data but has the same underlying layers.
+
+Notice that each of the datasets for today are larger than you will probably
+be able to use. You will need to filter the data to a particular team, year,
+subset of curse words. You may further filter the data to highlight an even
+smaller subset of the data within each plot.
+
+## Analysis
+This data shows the amount of curses used in each of Quinten Tarantino's movies, however is fairly straight forward and not very interesting.
+```{r}
+ggplot(tarantino, aes(movie)) +
+  geom_bar()
+  
+```
+Here, the data is the same as before, but now the bars are colored to show the amount of each curse word used in each film. Unsuprisingly, there is a large number of cursewords, with variations of the same word, and other more creative words that only show up a small handful of times. Overall there is too much data to really make any conclusions from this graph, other than tarantino's literal rainbow of vulgar language. 
+```{r}
+ggplot(tarantino, aes(movie)) +
+  geom_bar(aes(fill = word))
+```
+This next graph narrows down the words to only variations of the word fuck. It is not very suprising to see fucking and fuck, the two most basic forms of the word, were the most common. Other variations, such as fuckup and fuckface were less common. 
+
+```{r}
+tarantino_fuck <- filter(tarantino, word %in% c ("fuck", "fucked", "fucker", "fuckers", "fuckface", "fuckhead", "fucking", "fucks", "fuckup"))
+
+ggplot(tarantino_fuck, aes(movie)) +
+  geom_bar(aes(fill = word))
+
+```
+This plot took the original data and , instead of narrowing it down to variations of a single word, removed variations and looked at the amount of times the most common and basic curse words were used. Overall shit, fuck, and motherfucker were the most common. 
+```{r}
+tarantino_basics <- filter(tarantino, word %in% c("asshole", "bastard", "bitch", "bullshit", "cunt", "damn", "dick", "fuck", "hell", "motherfucker", "n-word", "pussy", "shit", "slut"))
+
+ggplot(tarantino_basics, aes(movie)) +
+  geom_bar(aes(fill = word))
+```
+Finally, I looked at how Quiten Tarantino used racist slurs in his movies. By far his favorite slur was the n-word, with significant use in Django Unchained, a movie about slavery. In fact the n-word is the only slur to be in every movie, with the exeption of Inglorious Basterds, which uses the word negro instead. 
+```{r}
+tarantino_racism <- filter(tarantino, word %in% c("n-word", "negro", "gook", "gooks", "jap", "japs", "jew (verb)", "n-word", "negro", "squaw", "slope", "wetback"))
+
+ggplot(tarantino_racism, aes(movie)) +
+  geom_bar(aes(fill = word))
+```
+
+
+
+
+
