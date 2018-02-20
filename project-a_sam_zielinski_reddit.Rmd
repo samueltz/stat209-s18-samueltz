@@ -1,0 +1,136 @@
+---
+title: "The Front Page of the Internet"
+author: "Sam Zielinski"
+output:
+  html_document:
+    df_print: paged
+---
+
+
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(plotly)
+library(viridis)
+```
+
+# The Front Page of the Internet
+
+## Overview
+
+For my research, I went onto the popular website, reddit, and surveyed the front page at various times of the day over the course of a couple days, making sure to record the title, subreddit, purpose, media type, upvotes, subject, and hours since uploaded. Since reddit is a very popluar site, I thought it would be intersting to see what types of trends occur in what subjects people like and respond to, and look at any reoccuring patterns in what apears on the front page of reddit. I was also interested in seeing if their is any correlation between how many upvotes something got and how long it was up for, when it was posted, and when it was on the frot page.
+
+## Data dictionary
+
+Here is a data dictionary for the reddit dataset:
+
+- **post_title**: Character variable telling the title of the post
+- **subreddit**: Character variable telling the sub reddit that the post was originally posted too.
+- **user**: Character variable telling the username of the original poster.
+- **media_type**:Categorical character variable telling the type of media the post uses.
+      - picture: post has an attached image
+      - gif: post has an attached gif
+      - video: post has an attached video
+      - article: post has a link to an external article
+      - text: post contains only text
+- **purpose**: Categorical character variable telling the intended purpose of the post.
+      - funny: intended to make people laugh
+      - cool/intersting: funfacts, interesting videos, and other odd things that aren't quite educational but entertaining
+      - news: current evernts and news
+      - educational: posts intended to teach the reader something new and substantial
+- **time_uploaded**: Numerical variable showing how many hours ago the post was uploaded.
+- **time_checked**: Numerical variable showing the time that when the data on the post was collected.
+- **upvotes**: Numerical variable how many upvotes (likes) the post recieved.
+- **content**:Categorical character variable telling the subject matter of the content.
+      - animals: posts containing animals
+      - celebrities: posts about celebrities
+      - movies/tv: posts pertaining to Tv and movies
+      - politics: posts about current events in politics
+      - world/art: posts showing art, nature, and other cultures
+      - science/technology: posts about currnet science and technology
+      - gaming: posts about video games
+      - sports: posts about sports
+      - advice: posts giving advice, wisdom, or philosophy
+      - history: posts about history
+      - social media: posts that contain other posts from social media
+      - extraordinary people: posts that include normal people doing extraordinary things
+      - comics: posts that contain comic strips
+      - other: posts that do not quite fit into the other categories
+
+Which can be read in as follows:
+
+```{r}
+reddit <- read_csv("https://raw.githubusercontent.com/urstats/stat209-s18-samueltz/master/stats_project_1_sam_zielinski.csv")
+reddit
+```
+
+
+## Exploratory Analysis
+
+```{r, echo = FALSE}
+ggplot(reddit, aes(content)) +
+  geom_bar(aes(fill = purpose)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.35)) +
+  xlab("Subject of Post") +
+  ylab("Number of Posts") +
+  ggtitle("Popularity of Each Subject")
+```
+
+
+This first graph plots the amount of times each subject area came up, with a colorful fill to show the purpose of each post. Overall the graph shows that the most popular category was animals, followed by world/art, and other. The graph also shows that posts were mostly made with more mindless entertainment in mind, as the funny, cool, and interesting posts were most popular, while more serious posts were less common. This shows the nature of the website as a whole, being more for quick entertainment than a serious news outlet.
+```{r, echo = FALSE}
+ggplot(reddit, aes(content, upvotes)) +
+  geom_point(aes(color = time_uploaded)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.35)) +
+  scale_color_viridis() +
+  annotate("text", x = "extraordinary people", y = 120000, label = "Picture and story of Anthony Borges") +
+  xlab("Subject of Post") +
+  ylab("Amount of Upvotes") +
+  ggtitle("Content of Post vs. Upvotes")
+```
+
+
+This next graph compared the same catagories of content, but compared them to the amount of upvotes each post recieved. The points were then colored to show how many hours ago the post was uploaded. The plot shows that animals, other, and extraordinary people recieved more average upvotes than than the other categories. The color gradient also showed that the longer the post had been up on the website, the more upvotes it recieved. One obvious outlier to this trend, however, is the post about a student who was shot holding a door closed during the recent school shooting in Florida. This shows that while the site has its focus on trivial and mundane entertainment, it still holds serious news in high regard. 
+
+```{r, echo=FALSE}
+edu <- filter(reddit, purpose == "educational")
+animals <- filter(reddit, content == "animals")
+
+ggplot(reddit, aes(time_uploaded, upvotes)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_point(data = edu, color = "red") +
+  annotate("text", x = 3, y = 100000, label = "red dots show educational posts") +
+  xlab("Hours Ago Uploaded") +
+  ylab("Amount of Upvotes") +
+  ggtitle("Upvotes on Educational Posts")
+ 
+```
+```{r, echo = FALSE}
+edu <- filter(reddit, purpose == "educational")
+animals <- filter(reddit, content == "animals")
+
+ggplot(reddit, aes(time_uploaded, upvotes)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_point(data = animals, color = "red") +
+  annotate("text", x = 3, y = 100000, label = "red dots show animal posts") +
+  xlab("Hours Ago Uploaded") +
+  ylab("Amount of Upvotes") +
+  ggtitle("Upvotes on Animal Posts")
+```
+
+
+These last two graphs show the relationship between how long the post has been up and how many upvotes it has. They both contain the same trend line, which shows a trend upwards, implying that the longer a post has been up, the more upvotes it recieves. The first graph shows posts with the purpose of education in red. Almost all of the red points fall below the trend line, showing that the educational posts recieve less upvotes on average than other posts. This agrees with the data from the previous graphs showing that less serious posts fair better on reddit. The second graph explores how posts about animals does compared to the rest of the posts. Shown in as red dots on the second graph, it looks like animals tend to have more upvotes that other posts compared to the average. Whils some posts still landed below the average, a good amount had significantly more upvotes than would be expected. This once agian lends to the trend of harmless and funny posts as the leader of reddit's front page.
+
+## Conclusion
+
+From the data that I managed to gather, I found that the longer a post had been on the website, the more upvotes it had. I was also able to look at the tyes of posts that do well, such as funny posts and animals realted posts, and posts that did not fair so well, such as educational posts. This data shows that the people who use reddit are more focused on something lighthearted to give them some quick entertainment. With this being said, extraordinary posts, such as the post about the boy who acted heroically during the Florida school shooting recieved excpetionally more upvotes, showing that very important or serious news, while rare, is at the top of the front page.
+
+## References
+
+www.reddit.com
+
