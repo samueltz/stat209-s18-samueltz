@@ -28,7 +28,7 @@ library(viridis)
 
 ##Introduction
 
-The city of Philadelphia is an interesting area, as there are areas of high wealth and poverty in such close proximity to each other. This project explores the inequality in wealth and how it relates to race in Philadelphia, Camden, and Wilmington. It looks at differences in income based on racial indentity as well as on location. It aslo looks at the distribution of different racial indentities across different nieghborhoods, and finally looks at where the inequalities may have come from.
+The city of Philadelphia is an interesting area, as there are areas of high wealth and poverty in such close proximity to each other. This project explores the inequality in wealth and how it relates to race in Philadelphia, Camden, and Wilmington. It looks at differences in income based on racial indentity as well as on location. It also looks at the distribution of different racial indentities across different nieghborhoods, and finally looks at where the inequalities may have come from.
 
 
 ```{r, echo = FALSE}
