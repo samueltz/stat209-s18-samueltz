@@ -1,0 +1,118 @@
+---
+title: "Lung Cancer, Poverty, and Population"
+author: "Sam Zielinski"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE, echo=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(out.width = "100%")
+knitr::opts_chunk$set(dpi = 300)
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(ggmap)
+library(viridis)
+library(forcats)
+library(smodels)
+```
+
+
+
+```{r}
+cancer <- read_csv("https://statsmaths.github.io/stat_data/cancer_inc_data.csv")
+
+cancer_mainland <- filter(cancer, !(state %in% c("hi", "ak")))
+cancer_state <- group_summarize(cancer_mainland, state)
+cancer_state$cancer_men <- cancer_state$prostate_mean + cancer_state$lung_mean + cancer_state$melanoma_mean
+cancer_region <- group_summarize(cancer, region)
+```
+##Introduction
+
+The data set that I looked at compiled information about the abundance of different cancers across communities throughout the United States. Also collected was information about the income, population, poverty rate, and racial makeup of these communities. I looked at the communities where lung cancer was most prevalent, and I looked at what might correlate to higher rates of lung cancer. I found that on the community level, as poverty increases and population decreases, the amount of people who suffer from lung cancer increases. The same trend was found for the state level, however when looking at the regional level poverty ceased to have a significant relationship with the abundance of lung cancer, while the correlation between population and lung cancer became stronger. For all of the graphs the rate of lung cancer is measured in cases of lung cancer per 100,000 men over 18, poverty is measured in percentage of people over the poverty line, and population is measured in estimated population. 
+
+
+##Lung Cancer at the Community Level
+```{r}
+ggplot(cancer, aes(poverty, lung)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ggtitle(label = "Lung Cancer and Poverty") +
+  xlab(label = "Percentage of Households Below Poverty Line") +
+  ylab(label = "Rate of Lung Cancer (Cases per 100,000 for men over 18)")
+
+ggplot(cancer, aes(population, lung)) +
+  geom_point() +
+  scale_x_log10() +
+   geom_smooth(method = "lm") +
+  ggtitle(label = "Population and Lung Cancer") +
+  xlab(label = "Estimated Population") +
+  ylab(label = "Rate of Lung Cancer (Cases per 100,000 for men over 18)")
+
+model <- lm_basic(lung ~ 1 + population + poverty, data = cancer)
+reg_table(model, level = 0.95)
+```
+
+
+First, I looked at the trend between poverty and lung cancer by plotting them together with a trend line. I then did the same thing but for population and lung cancer. The graphs showed that as poverty increased, the amount of people who suffered from lung cancer increased as well, while as population increased, lung cancer decreased in abundance. I then compared the two by running a linear regression of lung cancer with respect to both poverty and population and found that both the relationships from the graphs were significant. 
+
+##Lung Cancer at the State Level
+```{r}
+ggplot(cancer_state, aes(poverty_mean, lung_mean)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ggtitle(label = "Rate of Lung Cancer With Respect to Poverty Rate of States") +
+  xlab(label = "Average Percentage of People Below the Poverty Line") +
+  ylab(label = "Average Rate of Lung Cancer (Cases per 100,000 for men over 18)")
+
+ggplot(cancer_state, aes(population_mean, lung_mean)) +
+  geom_point() +
+  scale_x_log10() +
+  geom_smooth(method = "lm") +
+  ggtitle(label = "Rate of Lung Cancer With Respect to Population of States") +
+  xlab(label = "Average Population of Communities in Each State")
+
+model2 <- lm_basic(lung_mean ~ 1 + population_mean + poverty_mean, data = cancer_state)
+reg_table(model2, level = 0.95)
+```
+
+
+To follow up the results of the first graphs, I narrowed the range over which I tested for the correlation. I graphed the same two relationships, both poverty and population with respect to prevalence of lung cancer, but instead of looking at how they related for each individual community, I summarized the data of each community by state, therefore looking at the relationships between states. Both trends were more broad, however still maintained the same general correlations as the community level. After running a linear regression it was shown that both the relationships were again significant. It is worth noting that the population was not total population of each state, but average population of individual communities in each state. This was done because not all states may be equally represented by the data.
+
+##Lung Cancer at the Regional Level
+```{r}
+ggplot(cancer_region, aes(poverty_mean, lung_mean)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  ggtitle(label = "Rate of Lung Cancer With Respect to Poverty Rate of Regions") +
+  xlab(label = "Average Percentage of People below the Poverty Line") +
+  ylab(label = "Average Rate of Lung Cancer (Cases per 100,000 for men over 18)")
+
+ggplot(cancer_region, aes(population_mean, lung_mean)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  geom_text(aes(label = region)) +
+  ggtitle(label = "Rate of Lung Cancer with Resect to Average Population of US Regions") +
+  xlab(label = "Average Population of Communities in Each US Region") +
+  ylab(label = "Average Rate of Lung Cancer (Cases per 100,000 for men over 18)")
+
+model3 <- lm_basic(lung_mean ~ 1 + population_mean + poverty_mean, data = cancer_region)
+reg_table(model3, level = 0.95)
+```
+
+
+The final pair of graphs that I created narrowed the range once again, from the state level to the level of regions across the United States. Once again I looked at the same relationships as the previous two sets of graphs. The graphs showed that the points were much more broadly dispersed. The relationship between poverty and lung cancer was insignificant according to the linear regression, and the graph showed that, for the most part, the points were randomly scattered. The relationship between population and lung cancer was significant, however the points were more scattered than the other plots. Once again population was not a total, but an average of individual communities per each region.  
+
+##Conclusion
+
+The data over the all three levels shows that there is a trend between population and prevalence of lung cancer. The trend becomes more significant as the size of each data point increases, from the  individual community level to the regional level. At the regional level the largest outlier was the Mountain region, having much lower lung cancer rates for the population of the region. All the high lung cancer - low population areas are also connected to each other, in the midwest and south atlantic regions. The trend between poverty and lung cancer behaved in an opposite manner to population, however, and became less significant as the size of each data point increased. For the community level and the state level both trends were similarly significant, while at the regional level there was no trend. The trend probably decreases as the regions become larger because poverty among communities does don't correlate to the region, so as more communites are lumped together at the state and regional level, there are high and low poverty regions being lumped together, effectively allowing poverty to equalize across all regions and states. Population, on the other hand, might be more of a function of region, so its trend does carry on, as the data point size grows. Overall, higher rates of poverty correlate to higher rates of lung cancer at smaller communities levels, but not at regional levels. On the other hand, small population size correlates to higher rates of lung cancer among regional and state levels, but not so much among individual communities. 
+
+
+
+
+
+
+
